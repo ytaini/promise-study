@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<body>
+<script>
+
+  /*
+  * 1、async函数是使用async关键字声明的函数
+  *
+  * 2、async函数是AsyncFunction构造函数的实例， 并且其中允许使用await关键字
+  *
+  * 3、async和await关键字让我们可以用一种更简洁的方式写出基于Promise的异步行为，而无需刻意地链式调用promise
+  *
+  * 4、async函数返回一个promise对象。
+  *   如果返回值是非Promise实例对象，则返回一个promiseState为成功,promiseResult为返回值的Promise实例对象
+      如果返回值是Promise实例对象，则返回值决定了要返回的promise对象的result与state。
+
+    5、async函数可能包含0个或者多个await表达式
+
+  * 6、await表达式会暂停整个async函数的执行进程并出让其控制权，只有当其等待的基于promise
+  *   的异步操作被兑现或被拒绝之后才会恢复进程
+  *
+  * 7、async/await的目的为了简化使用基于promise的API时所需的语法。
+  *   async/await的行为就好像搭配使用了生成器和promise。
+  *
+  * 8、async函数一定会返回一个promise对象。如果一个async函数的返回值看起来不是promise，
+  *   那么它将会被隐式地包装在一个promise中。
+  * 9、async函数的函数体可以被看作是由0个或者多个await表达式分割开来的。
+  *   从第一行代码直到（并包括）第一个await表达式（如果有的话）都是同步运行的
+  * 10、一个不含await表达式的async函数是会同步运行的。
+  *   然而，如果函数体内有一个await表达式，async函数就一定会异步执行
+  * 11、在await表达式之后的代码可以被认为是存在，在链式调用的then回调中的，
+  *   多个await表达式都将加入链式调用的then回调中，返回值将作为最后一个then回调的返回值。
+  * 12、promise链不是一次就构建好的，相反，promise链是分阶段构造的，因此在处理异步函数时必须注意对错误函数的处理
+  * 13、大多数async函数也可以使用Promises编写。但是，在错误处理方面，async函数更容易捕获异常错误
+  * 14、如果任一await调用失败，它将自动捕获异常，async函数执行中断，并通过隐式返回Promise将错误传递给调用者
+  *
+  * 15、async/await的缺陷：
+  *     Async/await 让你的代码看起来是同步的，在某种程度上，也使得它的行为更加地同步。
+  *     await 关键字会阻塞其后的代码，直到promise完成，就像执行同步操作一样。
+  *     它确实可以允许其他任务在此期间继续运行，但您自己的代码被阻塞。
+  *     这意味着您的代码可能会因为大量await的promises相继发生而变慢。
+  *     async function timeTest() {
+          await timeoutPromise(3000);
+          await timeoutPromise(3000);
+          await timeoutPromise(3000);
+        } //总运行时间大约为9秒
+
+  *     每个await都会等待前一个完成，而你实际想要的是所有的这些promises同时开始处理（就像我们没有使用async/await时那样）。
+  *     有一种模式可以缓解这个问题——通过将 Promise 对象存储在变量中来同时开始它们，然后等待它们全部执行完毕。
+  *
+  *
+  *     async function timeTest() {
+          const timeoutPromise1 = timeoutPromise(3000);
+          const timeoutPromise2 = timeoutPromise(3000);
+          const timeoutPromise3 = timeoutPromise(3000);
+
+          await timeoutPromise1;
+          await timeoutPromise2;
+          await timeoutPromise3;
+        } // 总运行时间仅超过3秒
+  *
+  */
+/*
+  function resolveAfter2Seconds() {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        resolve('resolved')
+      },2000)
+    })
+  }
+
+  async function asyncCall(){
+    console.log('calling')
+    const result = await resolveAfter2Seconds()
+    console.log(result)
+  }
+
+  asyncCall()
+
+  console.log(111)
+  */
+/*
+  async function foo(){
+    const p1 = new Promise((resolve) => setTimeout(() => {
+      resolve('1')
+      throw 123
+    }, 1000))
+
+    const p2 = new Promise((_,reject) => setTimeout(() => reject('2'), 200))
+    const results = [await p1, await p2] // 不推荐使用这种方式，请使用 Promise.all或者Promise.allSettled
+    console.log(results)
+
+    // await Promise.all([new Promise((resolve) => setTimeout(() => resolve('1'), 3000))
+    //   ,new Promise((_,reject) => setTimeout(() => reject('2'), 500))])
+  }
+
+  const p = foo()
+  console.log(p)
+  p.catch(reason => {
+    console.log(reason)
+  })
+
+  */
+/*  function getProcessedData(url) {
+    return downloadData(url) // 返回一个 promise 对象
+      .catch(e => {
+        return downloadFallbackData(url)  // 返回一个 promise 对象
+      })
+      .then(v => {
+        return processDataInWorker(v); // 返回一个 promise 对象
+      });
+  }
+
+  async function getProcessedData(url) {
+    let v;
+    try {
+      v = await downloadData(url);
+    } catch (e) {
+      v = await downloadFallbackData(url);
+    }
+    return processDataInWorker(v);
+  }
+*/
+</script>
+</body>
+</html>

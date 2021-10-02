@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<body>
+<script>
+  /*1、async*/
+  /*
+  * 1、语法：async 函数
+  *   特点：函数的返回值为promise对象，promise对象的结果由async函数执行的返回值决定
+  *
+  * 2、async 函数就是 Generator 函数的语法糖。
+  *
+  *
+  *
+  * */
+
+
+  async function main() {
+    // return 123
+    //  如果返回值是非Promise实例对象，则返回一个promiseState为成功,promiseResult为返回值的Promise实例对象
+    return Promise.resolve('123')
+    //  如果返回值是Promise实例对象，则返回值决定了要返回的promise对象的result与state。
+  }
+
+  let result = main()
+  console.dir(main)
+
+
+  /*2、await*/
+  /*
+  * 1、语法：await 表达式
+  *   1、await必须写在async函数中。但async函数中可以没有await.
+  *   2、如果await后面的表达式是一个失败的promise对象，就会抛出异常。同时async函数会返回一个失败的promise对象,result为reason.
+  *     需要try catch进行捕获。同时可以在catch块中获取promise中result的值。
+  *
+  * 2、如果表达式是promise对象, await返回的是promise成功的result。
+  * 3、如果表达式是其他值，await直接将此值返回
+  *
+  * 3、await  操作符用于等待一个Promise 对象
+  *
+  * 3、await 表达式会暂停当前 async function 的执行，等待 Promise 处理完成。
+  *   若 Promise 正常处理(fulfilled)，其回调的resolve函数参数作为 await 表达式的值，继续执行 async function。
+  *   若 Promise 处理异常(rejected)，await 表达式会把 Promise 的异常原因抛出。
+  *
+  * 4、await表达式会暂停整个async函数的执行进程并出让其控制权，只有当其等待的基于promise的异步操作被兑现或被拒绝之后才会恢复进程。
+  *   promise的解决值会当当作该await表达式的返回值。使用async/await关键字就可以在异步代码中使用普通的try/catch代码块。
+  *
+  * 5、async函数的函数体可以被看作是由0个或者多个await表达式分隔开来的。从第一行代码直到（并包括)第一个await表达式都是同步运行的。
+  *   一个不包含await表达式的async函数是会同步运行的。如果函数体中有一个await表达式，async函数就一定会异步执行。
+  *
+  *
+  * 6、每个await表达式后面的代码可以被认为存在于.then回调中，多个await表达式都将加入链式调用的then回调中，返回值将作为最后一个then回调的返回值。
+  *
+  * 7、
+  * */
+
+
+  async function foo() {
+    const result1 = await new Promise((resolve) => setTimeout(() => resolve('1')))
+    const result2 = await new Promise((resolve) => setTimeout(() => resolve('2')))
+  }
+  foo()
+
+  /*
+  * 整个foo函数的执行将会被分为三个阶段。
+
+  1、foo函数的第一行将会同步执行，await将会等待promise的结束。然后暂停通过foo的进程，并将控制权交还给调用foo的函数。
+  2、一段时间后，当第一个promise完结的时候，控制权将重新回到foo函数内。示例中将会将1（promise状态为fulfilled）
+      作为结果返回给await表达式的左边即result1。接下来函数会继续进行，到达第二个await区域，此时foo函数的进程将再次被暂停。
+  3、一段时间后，同样当第二个promise完结的时候，result2将被赋值为2，之后函数将会正常同步执行，将默认返回undefined 。
+  * */
+
+
+  async function fun() {
+
+    /*let result = await new Promise((resolve, reject) => {
+      resolve('123')
+    })
+    console.log(result)
+    return result*/
+
+
+    /* return await new Promise((resolve, reject) => {
+       resolve('123')
+     })*/
+
+
+    try {
+      return await new Promise((resolve, reject) => {
+        reject('123')
+      })
+    } catch (e) {
+      return e
+    }
+  }
+
+  const p = fun()
+  // console.log(p)
+
+
+
+
+  function re(x){
+    return new Promise(resolve => {
+      setTimeout(()=>{
+        resolve(x)
+      },2000)
+    })
+  }
+
+  /*   AsyncFunction构造函数  */
+  /*
+
+  let AsyncFunction = Object.getPrototypeOf(async function () {}).constructor
+
+  let a = new AsyncFunction('a','b','return await re(a) + await re(b)')
+
+  a(10,20).then(v=>{
+    console.log(v)
+  })
+*/
+
+  async function a(a,b){
+    
+    console.log('calling')
+    let result = await re(a) + await re(b)
+    console.log(result)
+  }
+
+  a(10,20)
+
+</script>
+</body>
+</html>

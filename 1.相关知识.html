@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<body>
+<script>
+  /* 1、Promise.resolve() */
+  let p1 = Promise.resolve('success')
+
+  //返回一个Promise的实例对象，
+  //  如果传入的参数是非Promise实例对象，则返回promiseState为成功,promiseResult为参数值的Promise实例对象
+  //  如果传入的参数是Promise实例对象，则传入的promise对象决定了返回的promise对象的result与state。
+  let p2 = Promise.resolve(new Promise((resolve, reject) => {
+    resolve()
+    //当前执行器返回的值作为p2的值。
+  }))
+
+  p2.then(value => {
+
+  })
+  console.log(p1)
+
+
+  console.log('-----------------------------------------------')
+
+  /*2、Promise.reject() */
+  //返回一个失败的promise对象
+  //  当传入一个成功的promise对象时，一样返回一个失败的promise对象。
+  //  但此时promise对象中，promiseResult的值为传入的这个成功的promise对象。
+
+  const p3 = Promise.reject(new Promise((resolve, reject) => {
+    resolve('reject')
+  }))
+
+  p3.then(value => {
+
+  },reason => {
+    //此时reason为一个promiseState为成功的promise对象
+    reason.then(value => {
+      console.log(value);
+    })
+  })
+
+  console.log(p3)
+
+
+  /*3、Promise.all()*/
+  //参数：包含n个promise对象的数组。
+  //返回：返回一个新的promise对象，只有数组中所有的promise对象都是成功的，返回的promise对象才是成功。只要有一个失败就直接失败。
+  //  当返回一个成功的promise对象，它的promiseResult为，所有promise对象返回的promiseResult组成的数组。
+  //  当返回一个失败的promise对象，它的promiseResult为，第一个失败的promise对象返回的promiseResult。
+
+  const p4 = Promise.all([new Promise((resolve, reject) => {
+      resolve('p1')
+  }),new Promise((resolve, reject) => {
+    resolve('p2')
+  }),new Promise((resolve, reject) => {
+    resolve('p3')
+  }),new Promise((resolve, reject) => {
+    resolve('p4')
+  })])
+
+  p4.then(value => {
+    console.log(value)
+  },reason => {
+    console.log(reason)
+  })
+
+
+  /*4、Promise.race()*/
+  //参数：包含n个promise对象的数组。
+  //返回：返回一个新的promise对象，第一个改变state状态的promise对象的result给新的promise对象。
+  // 新的promise对象的状态也与第一个改变state状态的promise对象相同
+  const p6 = new Promise((resolve, reject) => {
+    reject('p6---')
+  })
+
+  const p7 = Promise.reject('p7')
+  const p8 = Promise.reject('p8')
+  const p9 = Promise.resolve('p9')
+
+  const p5 = Promise.race([p6,p7,p8,p9])
+
+  p5.then(value => {
+    console.log(value)
+  },reason => {
+    console.log(reason)
+  })
+
+
+  /*Promise的几个关键问题*/
+  /*
+  * 1、promise对象中的promiseState要如何修改？
+  *   1、初始化时，promiseState为pending
+  *   2、当调用resolve()函数，promiseState会将从pending ==> fulfilled(resolve)
+  *   3、当调用reject()函数，promiseState会从pending ==> reject
+  *   4、当抛出错误时，promiseState会从pending ==》 reject
+  *
+  *
+  *
+  * 2、一个promise对象指定多个成功/多个失败回调函数时，它们都会被调用嘛？
+  *   const p = new Promise((resolve,reject) => { resolve()})
+  *
+  *   p.then(value => {console.log('1')}) ①
+  *
+  *   p.then(value => {console.log('1')}) ②
+  *
+  *   当promise对象的promiseState属性改变时，代码① ②都会被调用。
+  *
+  *
+  *
+  * 3、改变promise状态和指定回调函数then谁先执行？
+  *   const p = new Promise((resolve,reject) => {
+  *     1、当Promise的执行器函数中的代码是同步任务时,
+  *       改变promise状态先执行。指定回调函数then后执行。
+  *       随后then()函数参数当中的回调函数得到数据，并执行。
+  *
+  *     //reject()
+  *
+  *     2、当Promise的执行器函数中的代码是异步任务时，
+  *     则指定回调函数then先执行，改变promise状态后执行。
+  *     当resolve()/reject()函数执行完成后,then()参数当中的回调函数才能得到数据，并执行。
+  *
+  *     setTimeout(()=>{
+  *       resolve()
+  *     },1000)
+  *   })
+  *
+  *   p.then(value => {},reason => {})
+  *
+  *   3、当故意延长更长的时间才调用then()时，与第一种情况一样。
+  *    setTimeout(()=>{
+  *       p.then(value => {},reason => {})
+  *    },2000)
+  *
+  *
+  *
+  *
+  *
+  * 4、promise.then()返回的新promise的结果、状态由什么决定？
+  *   const p = new Promise((resolve,reject) => {
+  *       resolve()
+  *   })
+  *
+  *   const p2 = p.then(value => {
+  *
+  *   promise对象p2的结果、状态由什么决定？？
+  *     1、当抛出错误时,p2的promiseResult为错误信息，state为reject
+  *     //throw '出现错误'
+  *     2、当返回一个非promise对象时，p2的promiseResult为 返回值。state为 fulfilled
+  *     //return 'abc'
+  *     3、当返回一个promise对象时，p2的promiseResult与state由返回的promise对象决定。
+  *     return Promise.resolve(value)
+  *
+  *   },reason => {
+  *     return Promise.reject(reason)
+  *   })
+  *
+  *   p2.then(value=>{
+  *
+  *   },reason=>{
+  *
+  *   })
+  *
+  *
+  *
+  *
+  * 5、通过Promise的链式调用，可以串联多个异步任务。让多个异步任务有顺序的执行。
+  *
+  *
+  * 6、promise中的异常穿透。
+  *   1、当使用promise的then链式调用时，可以只在最后指定失败的回调。前面任何操作出现异常，都会传到最后的失败回调中。
+  *    new Promise((resolve,reject) => {
+  *
+  *   }).then(value=>{
+  *
+  *   }).then(value => {
+  *
+  *   }).catch(reason => {
+  *
+  *   })
+  *
+  *
+  * 7、如何中断promise链？
+  *   通过在then的指定回调函数中返回一个state为pending的promise对象,可以使promise链在中间中断后面的链式调用。
+  *   原因：返回state为pending的promise对象,此时then()函数返回的promise对象的state没有被改变。后面的指定回调就都不会执行。
+  *
+  *   new Promise((resolve,reject) => {
+  *
+  *   }).then(value=>{
+  *       return new Promise(() => {})
+  *   }).then(value => {
+  *
+  *   }).catch(reason => {
+  *
+  *   })
+  *
+  *
+  *
+  * 8、注意：如果忽略针对某个状态的回调函数参数，或者提供非函数 (nonfunction) 参数，
+  *   那么 then 方法将会丢失关于该状态的回调函数信息，但是并不会产生错误。
+  *   即：如果调用 then 的 Promise 的状态（fulfillment 或 rejection）发生改变，但是 then 中并没有关于这种状态的回调函数，
+  *   那么 then 将创建一个没有经过回调函数处理的新 Promise 对象，这个新 Promise 只是简单地接受调用这个 then 的原 Promise 的终态作为它的终态。
+  *
+  *
+  * */
+
+</script>
+</body>
+</html>
